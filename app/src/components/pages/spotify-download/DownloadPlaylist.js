@@ -5,6 +5,20 @@ import { milisecondsToTime } from '../../../utils/time'
 import Spinner from 'react-spinkit'
 
 class DownloadPlaylist extends Component {
+  componentDidMount () {
+    this.props.data.subscribeToMore({
+      document: gql`
+        subscription NewMessageSubscription {
+            newMessage {
+              message
+            }
+        }`,
+      variables: {},
+      updateQuery: (prev, {subscriptionData}) => {
+          console.log(subscriptionData);
+      }
+    })
+  }
   render () {
     const { playlist } = this.props.data
     if (!playlist) {

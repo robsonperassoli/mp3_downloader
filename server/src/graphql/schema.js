@@ -13,6 +13,8 @@ import {
   PlaylistType
 } from './types'
 
+import pubsub from '../pubsub'
+
 import { search, getPlaylist } from '../utils/spotify'
 
 const QueryType = new GraphQLObjectType({
@@ -42,7 +44,7 @@ const QueryType = new GraphQLObjectType({
       },
       async resolve (parentValue, {userId, id}, request) {
         const playlist = await getPlaylist(userId, id)
-        
+
         return {
           ...playlist,
           image: playlist.images[0].url,
@@ -58,7 +60,29 @@ const QueryType = new GraphQLObjectType({
   })
 })
 
+const MessageType = new GraphQLObjectType({
+  name: 'MessageType',
+  fields: () => ({
+    message: { type: GraphQLString }
+  })
+})
 
 export default new GraphQLSchema({
-  query: QueryType
+  query: QueryType,
+  subscription: new GraphQLObjectType({
+    name: 'SubscriptionType',
+    fields: () => ({
+      newMessage: {
+        type: MessageType,
+        resolve: (payload, args, context, info) => {
+          console.log(payload);
+
+          return {
+            message: payload
+          };
+        },
+        subscribe: () => pubsub.asyncIterator('newMessage'),
+      }
+    })
+  })
 })
