@@ -5,6 +5,13 @@ import { milisecondsToTime } from '../../../utils/time'
 import Spinner from 'react-spinkit'
 
 class DownloadPlaylist extends Component {
+  startDownload () {
+    const {match: { params: {userId, playlistId}}} = this.props
+    this.props.mutate({
+      variables: {userId, playlistId}
+    })
+  }
+
   componentDidMount () {
     this.props.data.subscribeToMore({
       document: gql`
@@ -19,6 +26,7 @@ class DownloadPlaylist extends Component {
       }
     })
   }
+
   render () {
     const { playlist } = this.props.data
     if (!playlist) {
@@ -39,7 +47,7 @@ class DownloadPlaylist extends Component {
         <div className='column'>
           <div className='content'>
             <h2 className='title is-2'>{playlist.name}</h2>
-            <a className='button is-primary'>
+            <a className='button is-primary' onClick={() => this.startDownload()}>
               <span className='icon is-small'>
                 <i className='fa fa-download' />
                </span>
@@ -75,9 +83,17 @@ class DownloadPlaylist extends Component {
   }
 }
 
-export default graphql(gql`
+const downloadPlaylistMutation = gql`
+  mutation DownloadPlaylistMutation($userId: String!, $playlistId: String!) {
+    downloadPlaylist(userId: $userId, playlistId: $playlistId) {
+      requestId
+    }
+  }
+`
+
+const downloadPlaylistQuery = gql`
   query DownloadPlaylistQuery($userId: String!, $playlistId: ID!) {
-    playlist(userId: $userId, id: $playlistId) {
+    playlist(userId: $userId, playlistId: $playlistId) {
       id
       userId
       name
@@ -90,6 +106,12 @@ export default graphql(gql`
       }
     }
   }
-`, {
+`
+
+const DownloadPlaylistWithQuery = graphql(downloadPlaylistQuery, {
   options: ({match: { params: {userId, playlistId}}}) => ({variables: {userId, playlistId}})
-})(DownloadPlaylist);
+})(DownloadPlaylist)
+
+const DownloadPlaylistWithMutation = graphql(downloadPlaylistMutation)(DownloadPlaylistWithQuery)
+
+export default DownloadPlaylistWithMutation;

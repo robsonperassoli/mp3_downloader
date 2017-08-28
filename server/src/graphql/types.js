@@ -1,38 +1,44 @@
-import {
-  GraphQLID,
-  GraphQLInt,
-  GraphQLString,
-  GraphQLObjectType,
-  GraphQLList
-} from 'graphql'
+export default `
+  type SearchType {
+    id: String,
+    name: String,
+    image: String,
+    userId: String
+  }
 
-export const SearchType = new GraphQLObjectType({
-  name: 'SearchType',
-  fields: () => ({
-    id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    image: { type: GraphQLString },
-    userId: { type: GraphQLString }
-  })
-})
+  type TrackType {
+    id: ID,
+    name: String,
+    durationInMs: Int,
+    artists: String
+  }
 
-export const TrackType = new GraphQLObjectType({
-  name: 'TrackType',
-  fields: () => ({
-    id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    durationInMs: { type: GraphQLInt },
-    artists: { type: GraphQLString }
-  })
-})
+  type PlaylistType {
+    id: ID,
+    userId: ID,
+    name: String,
+    image: String,
+    tracks: [TrackType]
+  }
 
-export const PlaylistType = new GraphQLObjectType({
-  name: 'PlaylistType',
-  fields: () => ({
-    id: { type: GraphQLID },
-    userId: { type: GraphQLID },
-    name: { type: GraphQLString },
-    image: { type: GraphQLString },
-    tracks: { type: new GraphQLList(TrackType)}
-  })
-})
+  type DownloadPlaylistPayloadType {
+    requestId: ID
+  }
+
+  type MessageType {
+    message: String
+  }
+
+  type Query {
+    search(query: String!): [SearchType],
+    playlist(userId: String!, playlistId: ID!): PlaylistType
+  }
+
+  type Subscription {
+    newMessage: MessageType
+  }
+
+  type Mutation {
+    downloadPlaylist(userId: String!, playlistId: String!): DownloadPlaylistPayloadType
+  }
+`

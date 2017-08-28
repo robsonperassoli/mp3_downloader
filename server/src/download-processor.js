@@ -3,6 +3,8 @@ import { getPlaylist } from './utils/spotify'
 import { findSongsVideo, saveMp3FromVideos } from './utils/youtube'
 import { createZipWithLocalFiles } from './utils/zip'
 import { MP3_OUTPUT_PATH } from './config'
+import uuid from 'uuid/v4'
+import pubsub from './graphql/pubsub'
 
 const queue = kue.createQueue();
 queue.process('playlist-download', async (job, done) => {
@@ -27,11 +29,14 @@ queue.process('playlist-download', async (job, done) => {
     })
 
     console.log('starting zip creation')
-    await createZipWithLocalFiles(zipFileNames, `${MP3_OUTPUT_PATH}/playlist.zip`)
+    const zipName = `${uuid()}.zip`
+    await createZipWithLocalFiles(zipFileNames, `${MP3_OUTPUT_PATH}/${zipName}`)
     console.log('zip file done')
+
+    pubsub.publish('newMessage', `Download finished for ${{userId, playlistId}} ${zipName}`)    
 
     done()
   } catch(err) {
     console.error(err)
-  }  
+  }
 });
