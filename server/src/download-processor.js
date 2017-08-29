@@ -9,13 +9,13 @@ import pubsub from './graphql/pubsub'
 const queue = kue.createQueue();
 queue.process('playlist-download', async (job, done) => {
   try {
-    const { userId, playlistId } = job.data
+    const { userId, playlistId, clientId } = job.data
     const playlist = await getPlaylist(userId, playlistId)
-    
+
     const musicNames = playlist.tracks.items.map(item => `${item.track.name}-${item.track.artists.map(a => a.name).join(',')}`)
-    
+
     const videos = await findSongsVideo(musicNames)
-  
+
     const youtubeVideoIds = videos.filter(video => !!video.videoId).map(video => video.videoId)
     const savedFiles = await saveMp3FromVideos(youtubeVideoIds)
     console.log('mp3 files saved')
@@ -33,7 +33,7 @@ queue.process('playlist-download', async (job, done) => {
     await createZipWithLocalFiles(zipFileNames, `${MP3_OUTPUT_PATH}/${zipName}`)
     console.log('zip file done')
 
-    pubsub.publish('newMessage', `Download finished for ${{userId, playlistId}} ${zipName}`)    
+    pubsub.publish('playlistDownloadFinished', { clientId, filename: zipName })
 
     done()
   } catch(err) {

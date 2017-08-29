@@ -25,8 +25,8 @@ export default `
     requestId: ID
   }
 
-  type MessageType {
-    message: String
+  type DownloadPlaylistFinishedPayloadType {
+    filename: String
   }
 
   type Query {
@@ -35,10 +35,10 @@ export default `
   }
 
   type Subscription {
-    newMessage: MessageType
+    playlistDownloadFinished(clientId: String!): DownloadPlaylistFinishedPayloadType
   }
 
   type Mutation {
-    downloadPlaylist(userId: String!, playlistId: String!): DownloadPlaylistPayloadType
+    downloadPlaylist(userId: String!, playlistId: String!, clientId: String!): DownloadPlaylistPayloadType
   }
 `

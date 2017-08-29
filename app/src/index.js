@@ -14,8 +14,10 @@ import { gql } from 'react-apollo'
 import App from './components/app';
 import reducers from './reducers';
 
+const { hostname } = window.location
+
 // Create WebSocket client
-const wsClient = new SubscriptionClient(`ws://localhost:8000/subscriptions`, {
+const wsClient = new SubscriptionClient(`ws://${hostname}:8000/subscriptions`, {
     reconnect: true,
     connectionParams: {
         // Pass any arguments you want for initialization
@@ -23,7 +25,7 @@ const wsClient = new SubscriptionClient(`ws://localhost:8000/subscriptions`, {
 });
 
 const networkInterface = createNetworkInterface({
-  uri: 'http://localhost:8000/graphql'
+  uri: `http://${hostname}:8000/graphql`
 })
 
 // Extend the network interface with the WebSocket

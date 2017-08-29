@@ -3,26 +3,36 @@ import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import { milisecondsToTime } from '../../../utils/time'
 import Spinner from 'react-spinkit'
+import { load } from '../../../utils/local-storage'
 
 class DownloadPlaylist extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {processingPlaylist: false, downloadFinished: false}
+  }
   startDownload () {
     const {match: { params: {userId, playlistId}}} = this.props
     this.props.mutate({
-      variables: {userId, playlistId}
+      variables: {userId, playlistId, clientId: load('client-id')}
     })
+    this.setState({processingPlaylist: true})
   }
 
   componentDidMount () {
     this.props.data.subscribeToMore({
       document: gql`
-        subscription NewMessageSubscription {
-            newMessage {
-              message
+        subscription PlaylistDownloadFinishedSubscription($clientId: String!) {
+            playlistDownloadFinished(clientId: $clientId) {
+              filename
             }
         }`,
-      variables: {},
+      variables: {
+        clientId: load('client-id')
+      },
       updateQuery: (prev, {subscriptionData}) => {
-          console.log(subscriptionData);
+        const { filename } = subscriptionData.data.playlistDownloadFinished
+        this.setState({ processingPlaylist: false, downloadFinished: true, filename })
       }
     })
   }
@@ -47,16 +57,27 @@ class DownloadPlaylist extends Component {
         <div className='column'>
           <div className='content'>
             <h2 className='title is-2'>{playlist.name}</h2>
-            <a className='button is-primary' onClick={() => this.startDownload()}>
-              <span className='icon is-small'>
-                <i className='fa fa-download' />
-               </span>
-               <span>Start Download</span>
-            </a>
-            <br />
-            <br />
-            <progress className="progress is-primary" value="30" max="100">30%</progress>
+            {!this.state.processingPlaylist && (
+              <a className='button is-primary' onClick={() => this.startDownload()}>
+                <span className='icon is-small'>
+                  <i className='fa fa-download' />
+                </span>
+                <span>Start Download</span>
+              </a>
+            )}
+            {this.state.processingPlaylist && (
+              <div style={{paddingTop: '30px', paddingLeft: '30px'}}>
+                <Spinner name='ball-scale-ripple-multiple' fadeIn='quarter' color='#cccccc' />
+                <p style={{marginTop: '-13px', marginLeft: '30px'}}>Wait a minute, we are processing your playlist...</p>
+              </div>
+            )}
           </div>
+          {this.state.downloadFinished && (
+            <div className='notification'>
+              The file is ready to download: <a><i className='fa fa-download' /> {this.state.filename}</a>
+            </div>
+          )}
+
           <table className='table is-fullwidth'>
             <thead>
               <tr>
@@ -84,8 +105,8 @@ class DownloadPlaylist extends Component {
 }
 
 const downloadPlaylistMutation = gql`
-  mutation DownloadPlaylistMutation($userId: String!, $playlistId: String!) {
-    downloadPlaylist(userId: $userId, playlistId: $playlistId) {
+  mutation DownloadPlaylistMutation($userId: String!, $playlistId: String!, $clientId: String!) {
+    downloadPlaylist(userId: $userId, playlistId: $playlistId, clientId: $clientId) {
       requestId
     }
   }
