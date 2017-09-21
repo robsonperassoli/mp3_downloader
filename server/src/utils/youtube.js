@@ -59,7 +59,7 @@ export async function saveMp3FromVideos(videoIds) {
       resolve(savedFilesMap)
     }
     
-    downloader.on('finished', function(err, data) {
+    downloader.on('finished', (err, data) => {
       finishedCount++
 
       if(finishedCount === totalCount) {
@@ -67,7 +67,7 @@ export async function saveMp3FromVideos(videoIds) {
       }
     });
 
-    downloader.on('error', function(error) {
+    downloader.on('error', error => {
         reject(error)
     });
   })

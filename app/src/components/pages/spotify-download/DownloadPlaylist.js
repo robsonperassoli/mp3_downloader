@@ -4,6 +4,7 @@ import gql from 'graphql-tag'
 import { milisecondsToTime } from '../../../utils/time'
 import Spinner from 'react-spinkit'
 import { load } from '../../../utils/local-storage'
+import { getDownloadUrl } from '../../../utils/urls'
 
 class DownloadPlaylist extends Component {
   constructor (props) {
@@ -74,7 +75,7 @@ class DownloadPlaylist extends Component {
           </div>
           {this.state.downloadFinished && (
             <div className='notification'>
-              The file is ready to download: <a><i className='fa fa-download' /> {this.state.filename}</a>
+              The file is ready to download: <a href={getDownloadUrl(this.state.filename)}><i className='fa fa-download' /> {this.state.filename}</a>
             </div>
           )}
 

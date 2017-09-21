@@ -10,8 +10,10 @@ import { execute, subscribe } from 'graphql';
 import typeDefs from './graphql/types'
 import resolvers from './graphql/resolvers'
 import pubsub from './graphql/pubsub'
+import { ZIP_OUTPUT_PATH } from './config'
 
 const app = express();
+app.use(express.static(ZIP_OUTPUT_PATH));
 
 const schema = makeExecutableSchema({
   typeDefs,
