@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "babel-polyfill": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "concurrently": "^4.0.1",
     "cors": "^2.8.4",
     "date-fns": "^1.29.0",
     "express": "^4.15.3",
@@ -30,7 +31,6 @@
     "jest": "^20.0.4"
   },
   "scripts": {
-    "start": "babel-watch src/server.js",
-    "serve": "node dist/server.js"
+    "start": "concurrently \"babel-watch src/server.js\" \"babel-watch src/download-processor.js\""
   }
 }

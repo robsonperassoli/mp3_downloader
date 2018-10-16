@@ -1,3 +1,5 @@
+import 'babel-polyfill'
+
 import kue from 'kue'
 import { getPlaylist } from './utils/spotify'
 import { findSongsVideo, saveMp3FromVideos } from './utils/youtube'
